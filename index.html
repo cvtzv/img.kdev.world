@@ -498,87 +498,85 @@ async function signIn(email, password) {
             loadUserMedia();
         }
 
-        // Загрузка медиа файла
-        async function uploadMedia(file, title, privacyLevel) {
-            const fileExt = file.name.split('.').pop();
-            const fileName = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
-            const filePath = `media/${fileName}`;
-            const shareId = Math.random().toString(36).substr(2, 9);
+async function uploadMedia(file, title, privacyLevel) {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
+    const filePath = `media/${fileName}`;
+    const shareId = Math.random().toString(36).substr(2, 9);
 
-            try {
-                // Загрузка файла в Supabase Storage
-                const { data, error } = await supabase.storage
-                    .from('media')
-                    .upload(filePath, file);
+    try {
+        // Загрузка файла в Supabase Storage
+        const { data, error: uploadError } = await supabaseClient.storage
+            .from('media')
+            .upload(filePath, file);
 
-                if (error) throw error;
+        if (uploadError) throw uploadError;
 
-                // Получение публичного URL
-                const { publicURL, error: urlError } = supabase.storage
-                    .from('media')
-                    .getPublicUrl(filePath);
+        // Получение публичного URL
+        const { data: { publicUrl }, error: urlError } = supabaseClient.storage
+            .from('media')
+            .getPublicUrl(filePath);
 
-                if (urlError) throw urlError;
+        if (urlError) throw urlError;
 
-                // Сохранение информации о медиа в базе данных
-                const { error: dbError } = await supabase
-                    .from('media')
-                    .insert([
-                        {
-                            url: publicURL,
-                            title: title,
-                            privacy_level: privacyLevel,
-                            user_id: currentUser.uid,
-                            share_id: shareId,
-                            created_at: new Date().toISOString(),
-                            file_type: file.type.startsWith('video/') ? 'video' : 'image'
-                        }
-                    ]);
-
-                if (dbError) throw dbError;
-
-                // Перезагрузка медиа
-                loadUserMedia();
-                if (privacyLevel === 'public') {
-                    loadPublicMedia();
+        // Сохранение информации о медиа в базе данных
+        const { error: dbError } = await supabaseClient
+            .from('media')
+            .insert([
+                {
+                    url: publicUrl,
+                    title: title,
+                    privacy_level: privacyLevel,
+                    user_id: currentUser.id,
+                    share_id: shareId,
+                    file_type: file.type.startsWith('video/') ? 'video' : 'image'
                 }
+            ]);
 
-                return shareId;
-            } catch (error) {
-                console.error("Ошибка при загрузке файла:", error);
-                throw error;
-            }
+        if (dbError) throw dbError;
+
+        return shareId;
+    } catch (error) {
+        console.error("Ошибка при загрузке файла:", error);
+        throw error;
+    }
+}
+
+// Обработка формы загрузки
+document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const file = document.getElementById('mediaFile').files[0];
+    const title = document.getElementById('mediaTitle').value;
+    const privacyLevel = document.getElementById('privacyLevel').value;
+
+    if (!file) {
+        alert('Пожалуйста, выберите файл');
+        return;
+    }
+
+    try {
+        const shareId = await uploadMedia(file, title, privacyLevel);
+        
+        if (privacyLevel === 'link') {
+            const shareUrl = `${window.location.origin}/share/${shareId}`;
+            alert(`Файл успешно загружен!\nСсылка для доступа:\n${shareUrl}`);
+        } else {
+            alert('Файл успешно загружен!');
         }
-
-        // Обработка формы загрузки
-        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const file = document.getElementById('mediaFile').files[0];
-            const title = document.getElementById('mediaTitle').value;
-            const privacyLevel = document.getElementById('privacyLevel').value;
-
-            if (!file) {
-                alert('Пожалуйста, выберите файл');
-                return;
-            }
-
-            try {
-                const shareId = await uploadMedia(file, title, privacyLevel);
-                
-                if (privacyLevel === 'link') {
-                    const shareUrl = `${window.location.origin}/share/${shareId}`;
-                    alert(`Файл успешно загружен!\nСсылка для доступа:\n${shareUrl}`);
-                } else {
-                    alert('Файл успешно загружен!');
-                }
-                
-                // Очистка формы
-                e.target.reset();
-            } catch (error) {
-                alert('Ошибка при загрузке файла');
-            }
-        });
+        
+        // Очистка формы
+        e.target.reset();
+        // Перезагружаем списки медиа
+        loadUserMedia();
+        if (privacyLevel === 'public') {
+            loadPublicMedia();
+        }
+    } catch (error) {
+        console.error('Ошибка при загрузке файла:', error);
+        alert('Ошибка при загрузке файла');
+    }
+});
 
         // Обработка доступа по ссылке
         async function checkShareAccess(shareId) {
