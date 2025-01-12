@@ -314,25 +314,37 @@
     </div>
 
     <script>
-        // Конфигурация Supabase
-        const supabaseUrl = 'https://qitmyrzlznmdmkaxjosy.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFpdG15cnpsem5tZG1rYXhqb3N5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3MDA1MzcsImV4cCI6MjA1MjI3NjUzN30.q7VH6BdK4IEvOiF3xBTLtbqOOBdQDyW2MKy9a--ehfA';
-        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+        // Исправленная инициализация Supabase
+        const { createClient } = supabase;
+        const supabaseClient = createClient(
+            'https://qitmyrzlznmdmkaxjosy.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFpdG15cnpsem5tZG1rYXhqb3N5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3MDA1MzcsImV4cCI6MjA1MjI3NjUzN30.q7VH6BdK4IEvOiF3xBTLtbqOOBdQDyW2MKy9a--ehfA'
+        );
 
         let currentUser = null;
         let currentTab = 'all';
 
+        function toggleTheme() {
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme');
+            body.setAttribute('data-theme', currentTheme === 'dark' ? 'light' : 'dark');
+            localStorage.setItem('theme', body.getAttribute('data-theme'));
+        }
+
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        document.body.setAttribute('data-theme', savedTheme);
+
         // Функция авторизации
         async function signIn(email, password) {
             try {
-                const { data: { user }, error } = await supabase.auth.signInWithPassword({
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
                     email: email,
                     password: password
                 });
 
                 if (error) throw error;
 
-                currentUser = user;
+                currentUser = data.user;
                 showMainContent();
                 loadUserMedia();
             } catch (error) {
@@ -352,16 +364,13 @@
         // Функция выхода
         async function signOut() {
             try {
-                const { error } = await supabase.auth.signOut();
+                const { error } = await supabaseClient.auth.signOut();
                 if (error) throw error;
                 
                 currentUser = null;
                 document.getElementById('loginSection').style.display = 'block';
                 document.getElementById('mainContent').style.display = 'none';
                 document.getElementById('authButton').textContent = 'Войти';
-                document.getElementById('authButton').onclick = () => {
-                    document.getElementById('loginSection').style.display = 'block';
-                };
             } catch (error) {
                 console.error('Ошибка при выходе:', error);
             }
@@ -375,8 +384,7 @@
             document.getElementById('authButton').onclick = signOut;
         }
 
-        // Слушатель состояния авторизации
-        supabase.auth.onAuthStateChange((event, session) => {
+        supabaseClient.auth.onAuthStateChange((event, session) => {
             if (session) {
                 currentUser = session.user;
                 showMainContent();
@@ -386,9 +394,6 @@
                 document.getElementById('loginSection').style.display = 'block';
                 document.getElementById('mainContent').style.display = 'none';
                 document.getElementById('authButton').textContent = 'Войти';
-                document.getElementById('authButton').onclick = () => {
-                document.getElementById('loginSection').style.display = 'block';
-                };
             }
         });
 
@@ -466,6 +471,8 @@
                 container.appendChild(card);
             });
         }
+
+        document.querySelector('[onclick="signInWithGoogle()"]')?.remove();
 
         // Переключение вкладок
         function showTab(tab) {
