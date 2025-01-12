@@ -327,6 +327,27 @@
         const savedTheme = localStorage.getItem('theme') || 'light';
         document.body.setAttribute('data-theme', savedTheme);
 
+async function signIn(email, password) {
+    try {
+        const { data, error } = await supabaseClient.auth.signInWithPassword({
+            email: email,
+            password: password
+        });
+
+        if (error) {
+            document.getElementById('errorMessage').textContent = 'Ошибка входа: ' + error.message;
+            return;
+        }
+
+        // Успешный вход
+        document.getElementById('errorMessage').textContent = '';
+        showMainContent();
+    } catch (error) {
+        document.getElementById('errorMessage').textContent = 'Произошла ошибка при входе';
+        console.error('Ошибка входа:', error);
+    }
+}
+
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('loginEmail').value;
