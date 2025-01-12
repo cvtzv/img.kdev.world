@@ -7,192 +7,207 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
-            --bg-color: #f8f9fa;
-            --text-color: #2c3e50;
+            --bg-color: #f0f2f5;
+            --text-color: #1a1a1a;
             --card-bg: #ffffff;
-            --shadow: rgba(149, 157, 165, 0.1);
-            --accent: #3498db;
-            --success: #2ecc71;
-            --warning: #f1c40f;
-            --private: #e74c3c;
-            --radius: 16px;
-            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --accent: #4f46e5;
+            --accent-hover: #4338ca;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --private: #ef4444;
+            --input-bg: #f9fafb;
+            --border-color: #e5e7eb;
         }
 
         [data-theme="dark"] {
-            --bg-color: #1a1b1e;
-            --text-color: #ecf0f1;
-            --card-bg: #2d2e32;
-            --shadow: rgba(255, 255, 255, 0.05);
+            --bg-color: #111827;
+            --text-color: #f3f4f6;
+            --card-bg: #1f2937;
+            --input-bg: #374151;
+            --border-color: #374151;
+            --accent: #6366f1;
+            --accent-hover: #4f46e5;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            transition: var(--transition);
         }
 
         body {
-            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
-            line-height: 1.6;
+            line-height: 1.5;
+            transition: background-color 0.3s, color 0.3s;
         }
 
         .container {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 1rem;
         }
 
         header {
+            background-color: var(--card-bg);
+            padding: 1rem;
+            margin-bottom: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 20px 30px;
-            background-color: var(--card-bg);
-            margin-bottom: 30px;
-            border-radius: var(--radius);
-            box-shadow: 0 8px 30px var(--shadow);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
         }
 
-        .header-logo {
-            font-size: 24px;
+        h1 {
+            font-size: 1.5rem;
             font-weight: 700;
-            background: linear-gradient(45deg, var(--accent), #9b59b6);
+            background: linear-gradient(135deg, var(--accent), #8b5cf6);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            letter-spacing: -0.5px;
         }
 
-        .button {
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
             background-color: var(--accent);
             color: white;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 30px;
-            font-size: 15px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: var(--transition);
-            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.2);
         }
 
-        .button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(52, 152, 219, 0.3);
+        .btn-primary:hover {
+            background-color: var(--accent-hover);
+            transform: translateY(-1px);
         }
 
-        .theme-toggle {
-            background: var(--card-bg);
+        .btn-outline {
+            background-color: transparent;
             border: 2px solid var(--accent);
-            color: var(--text-color);
-            margin-right: 15px;
+            color: var(--accent);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--accent);
+            color: white;
         }
 
         .login-section {
             background-color: var(--card-bg);
-            border-radius: var(--radius);
-            padding: 40px;
+            border-radius: 1rem;
+            padding: 2rem;
             max-width: 400px;
-            margin: 40px auto;
-            box-shadow: 0 8px 30px var(--shadow);
+            margin: 2rem auto;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
 
         .login-form {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 1rem;
         }
 
-        .form-input {
-            padding: 15px;
-            border: 2px solid transparent;
-            border-radius: var(--radius);
-            font-size: 15px;
-            background-color: var(--bg-color);
+        .input {
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--border-color);
+            background-color: var(--input-bg);
             color: var(--text-color);
-            transition: var(--transition);
+            font-size: 0.875rem;
+            transition: border-color 0.2s;
         }
 
-        .form-input:focus {
-            border-color: var(--accent);
+        .input:focus {
             outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
         }
 
         .photo-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 25px;
-            padding: 20px 0;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
         }
 
         .photo-card {
             background-color: var(--card-bg);
-            border-radius: var(--radius);
+            border-radius: 1rem;
             overflow: hidden;
-            box-shadow: 0 8px 30px var(--shadow);
-            transform: translateY(0);
-            transition: var(--transition);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
         }
 
         .photo-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 40px var(--shadow);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
         }
 
-        .photo-card img, .photo-card video {
+        .photo-card img,
+        .photo-card video {
             width: 100%;
-            height: 250px;
+            height: 200px;
             object-fit: cover;
-            border-radius: var(--radius) var(--radius) 0 0;
         }
 
         .photo-info {
-            padding: 20px;
+            padding: 1rem;
         }
 
         .photo-info h3 {
-            margin-bottom: 10px;
-            font-size: 18px;
-            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
         }
 
         .privacy-badge {
             position: absolute;
-            top: 15px;
-            right: 15px;
-            padding: 8px 16px;
-            border-radius: 20px;
-            color: white;
-            font-size: 13px;
+            top: 0.75rem;
+            right: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
             font-weight: 500;
-            backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px);
+            color: white;
+            backdrop-filter: blur(4px);
         }
+
+        .privacy-public { background-color: var(--success); }
+        .privacy-link { background-color: var(--warning); }
+        .privacy-private { background-color: var(--private); }
 
         .tabs {
             display: flex;
-            gap: 15px;
-            margin: 30px 0;
-            padding: 5px;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            padding: 0.25rem;
             background-color: var(--card-bg);
-            border-radius: 35px;
-            box-shadow: 0 8px 30px var(--shadow);
-            width: fit-content;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
 
         .tab {
-            padding: 12px 24px;
-            border-radius: 25px;
-            font-size: 15px;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
             font-weight: 500;
             color: var(--text-color);
             cursor: pointer;
-            transition: var(--transition);
+            transition: all 0.2s;
+            border: none;
+            background: transparent;
         }
 
         .tab.active {
@@ -202,85 +217,118 @@
 
         .upload-section {
             background-color: var(--card-bg);
-            padding: 30px;
-            border-radius: var(--radius);
-            margin: 30px 0;
-            box-shadow: 0 8px 30px var(--shadow);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            margin: 2rem 0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
 
         .upload-form {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            max-width: 800px;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            max-width: 600px;
             margin: 0 auto;
         }
 
         .form-group {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 0.5rem;
         }
 
         .form-group label {
+            font-size: 0.875rem;
             font-weight: 500;
             color: var(--text-color);
         }
 
-        .privacy-select {
-            padding: 15px;
-            border: 2px solid transparent;
-            border-radius: var(--radius);
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            font-size: 15px;
-            cursor: pointer;
+        select.input {
+            appearance: none;
+            padding-right: 2.5rem;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 1rem;
+        }
+
+        .error-message {
+            color: var(--private);
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
         }
 
         .share-link {
-            margin-top: 15px;
-            padding: 15px;
-            background-color: var(--bg-color);
-            border-radius: var(--radius);
-            font-size: 14px;
+            background-color: var(--input-bg);
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
             word-break: break-all;
+            margin-top: 0.75rem;
         }
 
         @media (max-width: 768px) {
             .container {
-                padding: 15px;
+                padding: 0.75rem;
             }
 
             header {
                 flex-direction: column;
-                gap: 15px;
-                padding: 15px;
+                gap: 1rem;
+                text-align: center;
+                padding: 1rem;
             }
 
-            .photo-grid {
-                grid-template-columns: 1fr;
-                gap: 15px;
+            .btn {
+                width: 100%;
+                margin-top: 0.5rem;
             }
 
             .tabs {
                 flex-wrap: wrap;
-                justify-content: center;
+            }
+
+            .tab {
+                flex: 1 1 calc(50% - 0.25rem);
+                text-align: center;
+                padding: 0.75rem 1rem;
+            }
+
+            .photo-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .login-section {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
+
+            .upload-section {
+                padding: 1rem;
+                margin: 1rem 0;
+            }
+
+            .photo-card img,
+            .photo-card video {
+                height: 250px;
             }
         }
 
-        /* Анимации */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.25rem;
+            }
 
-        .photo-card {
-            animation: fadeIn 0.6s ease-out;
-            animation-fill-mode: both;
-        }
+            .btn {
+                font-size: 0.875rem;
+                padding: 0.625rem 1.25rem;
+            }
 
-        .photo-card:nth-child(even) {
-            animation-delay: 0.2s;
+            .photo-card img,
+            .photo-card video {
+                height: 200px;
+            }
         }
     </style>
 </head>
@@ -289,18 +337,18 @@
         <header>
             <h1>img.kdev.world</h1>
             <div>
-                <button class="theme-toggle" onclick="toggleTheme()">Сменить тему</button>
-                <button class="login-button" id="authButton">Войти</button>
+                <button class="btn btn-outline" onclick="toggleTheme()">Сменить тему</button>
+                <button class="btn btn-primary" id="authButton">Войти</button>
             </div>
         </header>
 
         <div id="loginSection" class="login-section">
             <h2>Вход в систему</h2>
             <form id="loginForm" class="login-form">
-                <input type="email" id="loginEmail" placeholder="Email" required class="login-input">
-                <input type="password" id="loginPassword" placeholder="Пароль" required class="login-input">
+                <input type="email" id="loginEmail" placeholder="Email" required class="input">
+                <input type="password" id="loginPassword" placeholder="Пароль" required class="input">
                 <div id="errorMessage" class="error-message"></div>
-                <button type="submit" class="login-button">Войти</button>
+                <button type="submit" class="btn btn-primary">Войти</button>
             </form>
         </div>
 
@@ -314,21 +362,21 @@
                 <form class="upload-form" id="uploadForm">
                     <div class="form-group">
                         <label for="mediaFile">Выберите файл</label>
-                        <input type="file" id="mediaFile" accept="image/*,video/*" required>
+                        <input type="file" id="mediaFile" accept="image/*,video/*" required class="input">
                     </div>
                     <div class="form-group">
                         <label for="mediaTitle">Название</label>
-                        <input type="text" id="mediaTitle" required class="privacy-select">
+                        <input type="text" id="mediaTitle" required class="input">
                     </div>
                     <div class="form-group">
                         <label for="privacyLevel">Уровень доступа</label>
-                        <select id="privacyLevel" class="privacy-select" required>
+                        <select id="privacyLevel" class="input" required>
                             <option value="public">Публичный</option>
                             <option value="link">Доступ по ссылке</option>
                             <option value="private">Приватный</option>
                         </select>
                     </div>
-                    <button type="submit" class="upload-button">Загрузить</button>
+                    <button type="submit" class="btn btn-primary">Загрузить</button>
                 </form>
             </div>
 
