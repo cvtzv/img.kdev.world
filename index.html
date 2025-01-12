@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>.cvt roflannov - MyImgur.</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.8.0/firebase-app-compat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.8.0/firebase-auth-compat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.8.0/firebase-storage-compat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.8.0/firebase-firestore-compat.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .auth-section {
+            display: flex;
+            gap: 10px;
+        }
+
+        .upload-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .image-card {
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .image-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+
+        .button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .button:hover {
+            background-color: #45a049;
+        }
+
+        .visibility-options {
+            margin: 10px 0;
+        }
+
+        .image-info {
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        .share-link {
+            word-break: break-all;
+            color: #2196F3;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Фотохостинг</h1>
+            <div class="auth-section">
+                <div id="auth-status"></div>
+                <button id="auth-button" class="button">Войти</button>
+            </div>
+        </header>
+
+        <section id="upload-section" class="upload-section hidden">
+            <h2>Загрузить изображение</h2>
+            <input type="file" id="file-input" accept="image/*">
+            <div class="visibility-options">
+                <label>
+                    <input type="radio" name="visibility" value="private" checked> Приватное
+                </label>
+                <label>
+                    <input type="radio" name="visibility" value="link"> По ссылке
+                </label>
+                <label>
+                    <input type="radio" name="visibility" value="public"> Публичное
+                </label>
+            </div>
+            <button id="upload-button" class="button">Загрузить</button>
+        </section>
+
+        <section class="gallery" id="gallery"></section>
+    </div>
+
+    <script>
+        // Конфигурация Firebase - замените на свои данные
+        const firebaseConfig = {
+            apiKey: "AIzaSyCGmFqASF3Q5c_tG7j-Z08sin7lpkwPGiM",
+            authDomain: "img-kdev-world.firebaseapp.com",
+            projectId: "img-kdev-world",
+            storageBucket: "img-kdev-world.firebasestorage.app",
+            messagingSenderId: "89613249306",
+            appId: "1:89613249306:web:64b1f97a78cff9ea7a5aa3"
+        };
+
+        // Инициализация Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const storage = firebase.storage();
+        const db = firebase.firestore();
+
+        // DOM элементы
+        const authButton = document.getElementById('auth-button');
+        const authStatus = document.getElementById('auth-status');
+        const uploadSection = document.getElementById('upload-section');
+        const fileInput = document.getElementById('file-input');
+        const uploadButton = document.getElementById('upload-button');
+        const gallery = document.getElementById('gallery');
+
+        // Аутентификация
+        authButton.addEventListener('click', () => {
+            if (!auth.currentUser) {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                auth.signInWithPopup(provider);
+            } else {
+                auth.signOut();
+            }
+        });
+
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                authStatus.textContent = `Привет, ${user.displayName}!`;
+                authButton.textContent = 'Выйти';
+                uploadSection.classList.remove('hidden');
+                loadImages();
+            } else {
+                authStatus.textContent = 'Вы не авторизованы';
+                authButton.textContent = 'Войти';
+                uploadSection.classList.add('hidden');
+                gallery.innerHTML = '';
+            }
+        });
+
+        // Загрузка изображения
+        uploadButton.addEventListener('click', async () => {
+            if (!fileInput.files[0]) return alert('Выберите файл');
+
+            const file = fileInput.files[0];
+            const visibility = document.querySelector('input[name="visibility"]:checked').value;
+            const userId = auth.currentUser.uid;
+
+            try {
+                const storageRef = storage.ref(`images/${Date.now()}_${file.name}`);
+                await storageRef.put(file);
+                const imageUrl = await storageRef.getDownloadURL();
+
+                const postData = {
+                    imageUrl,
+                    visibility,
+                    userId,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    shareLink: visibility === 'link' ? generateRandomString() : null
+                };
+
+                await db.collection('posts').add(postData);
+                fileInput.value = '';
+                loadImages();
+            } catch (error) {
+                console.error('Error uploading file:', error);
+                alert('Ошибка при загрузке файла');
+            }
+        });
+
+        // Загрузка изображений
+        async function loadImages() {
+            if (!auth.currentUser) return;
+
+            try {
+                const userId = auth.currentUser.uid;
+                const querySnapshot = await db.collection('posts')
+                    .where('userId', '==', userId)
+                    .orderBy('createdAt', 'desc')
+                    .get();
+
+                gallery.innerHTML = '';
+                querySnapshot.forEach(doc => {
+                    const data = doc.data();
+                    const card = createImageCard(data);
+                    gallery.appendChild(card);
+                });
+            } catch (error) {
+                console.error('Error loading images:', error);
+            }
+        }
+
+        // Создание карточки изображения
+        function createImageCard(data) {
+            const card = document.createElement('div');
+            card.className = 'image-card';
+            
+            const img = document.createElement('img');
+            img.src = data.imageUrl;
+            
+            const info = document.createElement('div');
+            info.className = 'image-info';
+            
+            const visibility = document.createElement('p');
+            visibility.textContent = `Видимость: ${getVisibilityText(data.visibility)}`;
+            
+            info.appendChild(visibility);
+            
+            if (data.shareLink) {
+                const shareLink = document.createElement('p');
+                shareLink.className = 'share-link';
+                shareLink.textContent = `Ссылка: ${window.location.origin}/share/${data.shareLink}`;
+                info.appendChild(shareLink);
+            }
+            
+            card.appendChild(img);
+            card.appendChild(info);
+            
+            return card;
+        }
+
+        // Вспомогательные функции
+        function getVisibilityText(visibility) {
+            const texts = {
+                private: 'Приватное',
+                link: 'По ссылке',
+                public: 'Публичное'
+            };
+            return texts[visibility] || visibility;
+        }
+
+        function generateRandomString() {
+            return Math.random().toString(36).substring(2, 15) + 
+                   Math.random().toString(36).substring(2, 15);
+        }
+    </script>
+</body>
+</html>
