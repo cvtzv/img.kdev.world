@@ -308,7 +308,6 @@
     </div>
 
     <script>
-        // Инициализация Supabase
         const { createClient } = supabase;
         const supabaseClient = createClient(
             'https://qitmyrzlznmdmkaxjosy.supabase.co',
@@ -318,49 +317,28 @@
         let currentUser = null;
         let currentTab = 'all';
 
-        // Функция переключения темы
-        function toggleTheme() {
-            const body = document.body;
-            const currentTheme = body.getAttribute('data-theme');
-            body.setAttribute('data-theme', currentTheme === 'dark' ? 'light' : 'dark');
-            localStorage.setItem('theme', body.getAttribute('data-theme'));
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            await signIn(email, password);
+        });
+
+        document.getElementById('authButton').addEventListener('click', () => {
+            const loginSection = document.getElementById('loginSection');
+            loginSection.style.display = loginSection.style.display === 'none' ? 'block' : 'none';
+        });
+
+        function showMainContent() {
+            document.getElementById('loginSection').style.display = 'none';
+            document.getElementById('mainContent').style.display = 'block';
+            document.getElementById('authButton').textContent = 'Выйти';
+            document.getElementById('authButton').onclick = async () => {
+                await supabaseClient.auth.signOut();
+                window.location.reload();
+            };
         }
 
-        // Установка начальной темы
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        document.body.setAttribute('data-theme', savedTheme);
-
-        // Функция авторизации
-        async function signIn(email, password) {
-            try {
-                const { data, error } = await supabaseClient.auth.signInWithPassword({
-                    email: email,
-                    password: password
-                });
-
-                if (error) throw error;
-
-                const { error: authCheckError } = await supabaseClient
-                    .from('authorized_users')
-                    .select()
-                    .eq('user_id', data.user.id)
-                    .single();
-
-                if (authCheckError) {
-                    await supabaseClient.auth.signOut();
-                    throw new Error('У вас нет доступа к загрузке медиа');
-                }
-
-                currentUser = data.user;
-                showMainContent();
-                loadUserMedia();
-            } catch (error) {
-                document.getElementById('errorMessage').textContent = error.message || 'Ошибка авторизации';
-                console.error('Ошибка авторизации:', error);
-            }
-        }
-
-        // Загрузка медиа файла
         async function uploadMedia(file, title, privacyLevel) {
             const fileExt = file.name.split('.').pop();
             const fileName = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
@@ -368,24 +346,18 @@
             const shareId = Math.random().toString(36).substr(2, 9);
 
             try {
-                // Загрузка файла в Storage
                 const { data, error: uploadError } = await supabaseClient.storage
                     .from('media')
-                    .upload(filePath, file, {
-                        upsert: false,
-                        cacheControl: '3600'
-                    });
+                    .upload(filePath, file);
 
                 if (uploadError) throw uploadError;
 
-                // Получение публичного URL
                 const { data: { publicUrl }, error: urlError } = supabaseClient.storage
                     .from('media')
                     .getPublicUrl(filePath);
 
                 if (urlError) throw urlError;
 
-                // Сохранение информации в базе данных
                 const { error: dbError } = await supabaseClient
                     .from('media')
                     .insert([
@@ -408,7 +380,6 @@
             }
         }
 
-        // Загрузка публичных медиа
         async function loadPublicMedia() {
             const { data, error } = await supabaseClient
                 .from('media')
@@ -628,15 +599,16 @@
         }
 
         // Слушатель состояния авторизации
-        firebase.auth().onAuthStateChanged((user) => {
-            if (user) {
-                checkUserAccess(user);
-            } else {
+        supabaseClient.auth.onAuthStateChange((event, session) => {
+            if (event === 'SIGNED_IN' && session) {
+                currentUser = session.user;
+                showMainContent();
+                loadUserMedia();
+            } else if (event === 'SIGNED_OUT') {
                 currentUser = null;
                 document.getElementById('loginSection').style.display = 'block';
                 document.getElementById('mainContent').style.display = 'none';
                 document.getElementById('authButton').textContent = 'Войти';
-                document.getElementById('authButton').onclick = signInWithGoogle;
             }
         });
 
