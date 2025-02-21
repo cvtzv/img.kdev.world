@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>img.kdev.world</title>
+    <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64,AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADw8PAs8PDw2PDw8Nzw8PAs8PDwBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPDw8BTw8PId9fX3ekJCQ95CQkPeQkJDePDw8iTw8PAY8PDwAAAAAAAAAAAAAAAAAAAAAAAAAAAA8PDwDPDw8fZCQkP2QkJD/kJCQ/5CQkP+QkJD/kJCQ/5CQkP08PDx/PDw8BAAAAAAAAAAAAAAAADw8PAE8PDxvkJCQ+pCQkP+QkJD/kJCQ/5CQkP+QkJD/kJCQ/5CQkP+QkJD6PDw8cTw8PAEAAAAAAAAAADw8PBs8PDzOkJCQ/5CQkP+QkJD/kJCQ/5CQkP+QkJD/kJCQ/5CQkP+QkJD/PDw8zjw8PBwAAAAAPDw8ATw8PIKQkJD/kJCQ/5CQkP+QkJD/kJCQ/5CQkP+QkJD/kJCQ/5CQkP+QkJD/PDw8hDw8PAE8PDwHPDw8npCQkP+QkJD/kJCQ/5CQkP+QkJD/kJCQ/5CQkP+QkJD/kJCQ/5CQkP+QkJD/PDw8oTw8PAg8PDwmPDw81ZCQkP+QkJD/kJCQ/5CQkP+QkJD/kJCQ/5CQkP+QkJD/kJCQ/5CQkP+QkJD/PDw81zw8PCc8PDwmPDw81ZCQkP+QkJD/kJCQ/5CQkP+QkJD/kJCQ/5CQkP+QkJD/kJCQ/5CQkP+QkJD/PDw81zw8PCc8PDwHPDw8npCQkP+QkJD/kJCQ/5CQkP+QkJD/kJCQ/5CQkP+QkJD/kJCQ/5CQkP+QkJD/PDw8oTw8PAg8PDwBPDw8gpCQkP+QkJD/kJCQ/5CQkP+QkJD/kJCQ/5CQkP+QkJD/kJCQ/5CQkP88PDyEPDw8AQAAAAAAAAAAPDw8G5CQkM6QkJD/kJCQ/5CQkP+QkJD/kJCQ/5CQkP+QkJD/kJCQ/zw8PM48PDwcAAAAAAAAAAAAAAAAPDw8AZCQkG+QkJD6kJCQ/5CQkP+QkJD/kJCQ/5CQkP+QkJD/PDw8cTw8PAEAAAAAAAAAAAAAAAAAAAAAAAAAAD8/PwOQkJB9kJCQ/ZCQkP+QkJD/kJCQ/5CQkP88PDx/PDw8BAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADw8PAWQkJCHkJCQ3pCQkPeQkJD3kJCQ3jw8PIk8PDwGPDw8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPDw8Czw8PDY8PDw3PDw8Czw8PAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=" />
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
@@ -290,7 +291,7 @@
     </div>
 
     <script>
-        const supabase = supabase.createClient(
+        const supabaseClient = supabase.createClient(
             'https://qitmyrzlznmdmkaxjosy.supabase.co',
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFpdG15cnpsem5tZG1rYXhqb3N5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3MDA1MzcsImV4cCI6MjAyMjI3NjUzN30.q7VH6BdK4IEvOiF3xBTLtbqOOBdQDyW2MKy9a--ehfA'
         );
@@ -314,7 +315,7 @@
             const password = document.getElementById('loginPassword').value;
 
             try {
-                const { data, error } = await supabase.auth.signInWithPassword({
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
                     email,
                     password
                 });
@@ -329,7 +330,7 @@
         }
 
         async function loadMedia() {
-            const query = supabase.from('media')
+            const query = supabaseClient.from('media')
                 .select('*, comments(*)');
 
             if (!currentUser) {
@@ -345,7 +346,7 @@
                 return;
             }
 
-            displayMedia(data);
+            displayMedia(data || []);
         }
 
         function displayMedia(items) {
@@ -409,18 +410,19 @@
 
             try {
                 const fileName = `${Date.now()}_${file.name}`;
-                const { data: uploadData, error: uploadError } = await supabase.storage
+                const { data: uploadData, error: uploadError } = await supabaseClient.storage
                     .from('media')
                     .upload(`public/${fileName}`, file);
 
                 if (uploadError) throw uploadError;
 
-                const { data: { publicUrl } } = supabase.storage
+                const { data: { publicUrl } } = supabaseClient.storage
                     .from('media')
                     .getPublicUrl(`public/${fileName}`);
 
-                const { error: dbError } = await supabase.from('media').insert([{
-                    url: publicUrltitle: title,
+                const { error: dbError } = await supabaseClient.from('media').insert([{
+                    url: publicUrl,
+                    title: title,
                     privacy_level: privacyLevel,
                     user_id: currentUser.id,
                     share_id: shareId,
@@ -448,7 +450,7 @@
             const content = input.value;
 
             try {
-                const { error } = await supabase.from('comments').insert([{
+                const { error } = await supabaseClient.from('comments').insert([{
                     media_id: mediaId,
                     author: currentUser?.email || 'Гость',
                     content: content
@@ -467,7 +469,7 @@
             const pathParts = window.location.pathname.split('/');
             if (pathParts[1] === 's') {
                 const shareId = pathParts[2];
-                const { data, error } = await supabase
+                const { data, error } = await supabaseClient
                     .from('media')
                     .select('*')
                     .eq('share_id', shareId)
@@ -498,14 +500,14 @@
             }
         }
 
-        supabase.auth.onAuthStateChange((event, session) => {
+        supabaseClient.auth.onAuthStateChange((event, session) => {
             currentUser = session?.user || null;
             const authButton = document.getElementById('authButton');
             const uploadSection = document.getElementById('uploadSection');
 
             if (currentUser) {
                 authButton.textContent = 'Выйти';
-                authButton.onclick = () => supabase.auth.signOut();
+                authButton.onclick = () => supabaseClient.auth.signOut();
                 uploadSection.style.display = 'block';
             } else {
                 authButton.textContent = 'Войти';
@@ -526,6 +528,7 @@
             const savedTheme = localStorage.getItem('theme') || '';
             document.body.setAttribute('data-theme', savedTheme);
             handleShare();
+            loadMedia();
         });
     </script>
 </body>
