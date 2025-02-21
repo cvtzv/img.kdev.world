@@ -8,26 +8,25 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
-            --bg-color: #1a1a2e;
-            --text-color: #e6e6ff;
-            --card-bg: rgba(26, 26, 46, 0.9);
-            --accent: #4d4dff;
-            --accent-hover: #3333ff;
-            --success: #00cc66;
-            --warning: #ffcc00;
-            --private: #ff3333;
-            --input-bg: rgba(26, 26, 46, 0.7);
-            --border-color: #333366;
+            --bg-color: #f5f5f7;
+            --text-color: #1d1d1f;
+            --card-bg: #ffffff;
+            --accent: #0071e3;
+            --accent-hover: #0077ed;
+            --success: #34c759;
+            --warning: #ff9f0a;
+            --private: #ff3b30;
+            --input-bg: #f5f5f7;
+            --border-color: #d2d2d7;
+            --modal-bg: rgba(0, 0, 0, 0.5);
         }
 
-        [data-theme="light"] {
-            --bg-color: #f0f0ff;
-            --text-color: #1a1a2e;
-            --card-bg: rgba(255, 255, 255, 0.9);
-            --accent: #3333ff;
-            --accent-hover: #1a1aff;
-            --input-bg: rgba(255, 255, 255, 0.8);
-            --border-color: #ccccff;
+        [data-theme="dark"] {
+            --bg-color: #000000;
+            --text-color: #f5f5f7;
+            --card-bg: #1d1d1f;
+            --input-bg: #1d1d1f;
+            --border-color: #424245;
         }
 
         * {
@@ -47,44 +46,38 @@
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 0.5rem;
+            padding: 1rem;
         }
 
         header {
             background: var(--card-bg);
-            padding: 0.75rem;
-            border-radius: 0.5rem;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            margin-bottom: 1rem;
+            padding: 1rem;
+            border-radius: 1rem;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            backdrop-filter: blur(5px);
         }
 
         .header-logo {
-            font-size: 1.25rem;
+            font-size: 1.5rem;
             font-weight: 600;
             color: var(--accent);
             text-decoration: none;
         }
 
-        .header-actions {
-            display: flex;
-            gap: 0.5rem;
-            align-items: center;
-        }
-
         .btn {
-            padding: 0.5rem 1rem;
-            border-radius: 0.25rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
             border: none;
             cursor: pointer;
-            font-size: 0.875rem;
+            font-size: 1rem;
             transition: all 0.2s ease;
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
+            font-weight: 500;
         }
 
         .btn-primary {
@@ -96,67 +89,34 @@
             background: var(--accent-hover);
         }
 
-        .login-modal {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: var(--card-bg);
-            padding: 1.5rem;
-            border-radius: 0.5rem;
-            width: 90%;
-            max-width: 320px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
-            z-index: 1000;
-            display: none;
-        }
-
-        .login-modal.active {
-            display: block;
-        }
-
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(3px);
-            z-index: 999;
-            display: none;
-        }
-
-        .modal-overlay.active {
-            display: block;
-        }
-
         .input {
             width: 100%;
-            padding: 0.5rem;
+            padding: 0.75rem;
             border: 1px solid var(--border-color);
-            border-radius: 0.25rem;
+            border-radius: 0.75rem;
             background: var(--input-bg);
             color: var(--text-color);
-            margin-bottom: 0.75rem;
+            margin-bottom: 1rem;
+            font-size: 1rem;
         }
 
         .media-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 1rem;
-            margin-top: 1rem;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
         }
 
         .media-card {
             background: var(--card-bg);
-            border-radius: 0.5rem;
+            border-radius: 1rem;
             overflow: hidden;
             transition: transform 0.2s ease;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
         }
 
         .media-card:hover {
-            transform: translateY(-2px);
+            transform: translateY(-4px);
         }
 
         .media-content {
@@ -175,81 +135,102 @@
         }
 
         .media-info {
-            padding: 0.75rem;
+            padding: 1.25rem;
         }
 
         .media-title {
-            font-size: 1rem;
-            margin-bottom: 0.25rem;
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
             color: var(--text-color);
         }
 
-        .privacy-badge {
-            position: absolute;
-            top: 0.5rem;
-            right: 0.5rem;
-            padding: 0.25rem 0.5rem;
-            border-radius: 1rem;
-            font-size: 0.75rem;
-            color: white;
-            backdrop-filter: blur(3px);
-        }
-
-        .privacy-public { background: var(--success); }
-        .privacy-link { background: var(--warning); }
-        .privacy-private { background: var(--private); }
-
-        .share-link {
-            margin-top: 0.5rem;
-            padding: 0.5rem;
-            background: var(--input-bg);
-            border-radius: 0.25rem;
-            font-size: 0.75rem;
-            word-break: break-all;
-        }
-
         .comments-section {
-            margin-top: 0.75rem;
+            margin-top: 1rem;
             border-top: 1px solid var(--border-color);
-            padding-top: 0.75rem;
+            padding-top: 1rem;
         }
 
         .comment {
-            font-size: 0.875rem;
-            margin-bottom: 0.5rem;
-            padding: 0.5rem;
             background: var(--input-bg);
-            border-radius: 0.25rem;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            margin-bottom: 0.75rem;
         }
 
         .comment-author {
             font-weight: 600;
-            margin-bottom: 0.25rem;
+            margin-bottom: 0.5rem;
+            color: var(--accent);
+        }
+
+        .comment-form {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .comments-toggle {
+            color: var(--accent);
+            font-size: 0.875rem;
+            cursor: pointer;
+            margin: 0.5rem 0;
+            text-decoration: underline;
+        }
+
+        .comments-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 1rem;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            z-index: 1001;
+            display: none;
+        }
+
+        .comments-modal.active {
+            display: block;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--modal-bg);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            display: none;
+        }
+
+        .modal-overlay.active {
+            display: block;
+        }
+
+        .comment-inputs {
+            display: flex;
+            gap: 0.75rem;
         }
 
         @media (max-width: 768px) {
             .container {
-                padding: 0.25rem;
-            }
-
-            .media-grid {
-                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-                gap: 0.75rem;
-            }
-
-            .btn {
-                padding: 0.375rem 0.75rem;
-                font-size: 0.8125rem;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .header-logo {
-                font-size: 1rem;
+                padding: 0.75rem;
             }
 
             .media-grid {
                 grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .comment-inputs {
+                flex-direction: column;
             }
         }
     </style>
@@ -291,64 +272,6 @@
     </div>
 
     <script>
-        const supabaseClient = supabase.createClient(
-            'https://qitmyrzlznmdmkaxjosy.supabase.co',
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFpdG15cnpsem5tZG1rYXhqb3N5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3MDA1MzcsImV4cCI6MjA1MjI3NjUzN30.q7VH6BdK4IEvOiF3xBTLtbqOOBdQDyW2MKy9a--ehfA'
-        );
-
-        let currentUser = null;
-
-        function toggleTheme() {
-            const theme = document.body.getAttribute('data-theme') === 'light' ? '' : 'light';
-            document.body.setAttribute('data-theme', theme);
-            localStorage.setItem('theme', theme);
-        }
-
-        function toggleModal() {
-            document.getElementById('modalOverlay').classList.toggle('active');
-            document.getElementById('loginModal').classList.toggle('active');
-        }
-
-        async function handleAuth(event) {
-            event.preventDefault();
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-
-            try {
-                const { data, error } = await supabaseClient.auth.signInWithPassword({
-                    email,
-                    password
-                });
-
-                if (error) throw error;
-
-                toggleModal();
-                document.getElementById('loginForm').reset();
-            } catch (error) {
-                alert('Ошибка входа: ' + error.message);
-            }
-        }
-
-        async function loadMedia() {
-            const query = supabaseClient.from('media')
-                .select('*, comments(*)');
-
-            if (!currentUser) {
-                query.eq('privacy_level', 'public');
-            } else {
-                query.or(`privacy_level.eq.public,user_id.eq.${currentUser.id}`);
-            }
-
-            const { data, error } = await query.order('created_at', { ascending: false });
-
-            if (error) {
-                console.error('Ошибка загрузки медиа:', error);
-                return;
-            }
-
-            displayMedia(data || []);
-        }
-
         function displayMedia(items) {
             const grid = document.getElementById('mediaGrid');
             grid.innerHTML = '';
@@ -357,22 +280,20 @@
                 const card = document.createElement('div');
                 card.className = 'media-card';
 
+                const comments = item.comments || [];
+                const visibleComments = comments.slice(0, 3);
+                const hasMoreComments = comments.length > 3;
+
+                const commentsHTML = visibleComments.map(comment => `
+                    <div class="comment">
+                        <div class="comment-author">${comment.author}</div>
+                        <div>${comment.content}</div>
+                    </div>
+                `).join('');
+
                 const mediaContent = item.file_type === 'video' ?
                     `<video src="${item.url}" controls></video>` :
                     `<img src="${item.url}" alt="${item.title}">`;
-
-                const shareLink = item.privacy_level === 'link' ?
-                    `<div class="share-link">Ссылка: ${window.location.origin}/s/${item.share_id}</div>` : '';
-
-                const comments = item.comments?.length ?
-                    `<div class="comments-section">
-                        ${item.comments.map(comment => `
-                            <div class="comment">
-                                <div class="comment-author">${comment.author}</div>
-                                <div>${comment.content}</div>
-                            </div>
-                        `).join('')}
-                    </div>` : '';
 
                 card.innerHTML = `
                     <div class="media-content">
@@ -385,14 +306,24 @@
                     <div class="media-info">
                         <h3 class="media-title">${item.title}</h3>
                         <div>${new Date(item.created_at).toLocaleDateString()}</div>
-                        ${shareLink}
-                        ${comments}
-                        ${item.privacy_level === 'public' ? `
-                            <form class="comment-form" onsubmit="addComment(event, '${item.id}')">
-                                <input type="text" class="input" placeholder="Добавить комментарий" required>
-                                <button type="submit" class="btn btn-primary">Отправить</button>
-                            </form>
-                        ` : ''}
+                        ${item.privacy_level === 'link' ? 
+                            `<div class="share-link">Ссылка: ${window.location.origin}/s/${item.share_id}</div>` : ''}
+                        <div class="comments-section">
+                            ${commentsHTML}
+                            ${hasMoreComments ? 
+                                `<div class="comments-toggle" onclick="showAllComments('${item.id}', ${JSON.stringify(comments).replace(/"/g, '&quot;')})">
+                                    Читать больше...
+                                </div>` : ''}
+                            ${item.privacy_level === 'public' ? `
+                                <form class="comment-form" onsubmit="addComment(event, '${item.id}')">
+                                    <div class="comment-inputs">
+                                        <input type="text" class="input" placeholder="Ваше имя" required name="author">
+                                        <input type="text" class="input" placeholder="Комментарий" required name="content">
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Отправить</button>
+                                </form>
+                            ` : ''}
+                        </div>
                     </div>
                 `;
 
@@ -400,129 +331,88 @@
             });
         }
 
-        async function handleUpload(event) {
-            event.preventDefault();
+        function showAllComments(mediaId, comments) {
+            const modalOverlay = document.createElement('div');
+            modalOverlay.className = 'modal-overlay active';
             
-            const file = document.getElementById('mediaFile').files[0];
-            const title = document.getElementById('mediaTitle').value;
-            const privacyLevel = document.getElementById('privacyLevel').value;
-            const shareId = Math.random().toString(36).substring(2, 15);
-
-            try {
-                const fileName = `${Date.now()}_${file.name}`;
-                const { data: uploadData, error: uploadError } = await supabaseClient.storage
-                    .from('media')
-                    .upload(`public/${fileName}`, file);
-
-                if (uploadError) throw uploadError;
-
-                const { data: { publicUrl } } = supabaseClient.storage
-                    .from('media')
-                    .getPublicUrl(`public/${fileName}`);
-
-                const { error: dbError } = await supabaseClient.from('media').insert([{
-                    url: publicUrl,
-                    title: title,
-                    privacy_level: privacyLevel,
-                    user_id: currentUser.id,
-                    share_id: shareId,
-                    file_type: file.type.startsWith('video/') ? 'video' : 'image'
-                }]);
-
-                if (dbError) throw dbError;
-
-                event.target.reset();
-                loadMedia();
-
-                if (privacyLevel === 'link') {
-                    alert(`Файл загружен! Ссылка для доступа:\n${window.location.origin}/s/${shareId}`);
-                } else {
-                    alert('Файл успешно загружен!');
+            const modal = document.createElement('div');
+            modal.className = 'comments-modal active';
+            
+            const commentsHTML = comments.map(comment => `
+                <div class="comment">
+                    <div class="comment-author">${comment.author}</div>
+                    <div>${comment.content}</div>
+                </div>
+            `).join('');
+            
+            modal.innerHTML = `
+                <h3>Все комментарии</h3>
+                <div class="comments-section">
+                    ${commentsHTML}
+                    <form class="comment-form" onsubmit="addCommentAndRefresh(event, '${mediaId}')">
+                        <div class="comment-inputs">
+                            <input type="text" class="input" placeholder="Ваше имя" required name="author">
+                            <input type="text" class="input" placeholder="Комментарий" required name="content">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Отправить</button>
+                    </form>
+                </div>
+                <button class="btn" style="margin-top: 1rem;" onclick="closeCommentsModal()">Закрыть</button>
+            `;
+            
+            modalOverlay.appendChild(modal);
+            document.body.appendChild(modalOverlay);
+            
+            modalOverlay.addEventListener('click', (e) => {
+                if (e.target === modalOverlay) {
+                    closeCommentsModal();
                 }
-            } catch (error) {
-                alert('Ошибка при загрузке: ' + error.message);
+            });
+        }
+
+        function closeCommentsModal() {
+            const modalOverlay = document.querySelector('.modal-overlay');
+            if (modalOverlay) {
+                modalOverlay.remove();
             }
         }
 
         async function addComment(event, mediaId) {
             event.preventDefault();
-            const input = event.target.querySelector('input');
-            const content = input.value;
+            const authorInput = event.target.querySelector('input[name="author"]');
+            const contentInput = event.target.querySelector('input[name="content"]');
+            const author = authorInput.value;
+            const content = contentInput.value;
 
             try {
                 const { error } = await supabaseClient.from('comments').insert([{
                     media_id: mediaId,
-                    author: currentUser?.email || 'Гость',
+                    author: author,
                     content: content
                 }]);
 
                 if (error) throw error;
 
-                input.value = '';
+                authorInput.value = '';
+                contentInput.value = '';
                 loadMedia();
             } catch (error) {
                 alert('Ошибка при добавлении комментария: ' + error.message);
             }
         }
 
-        async function handleShare() {
-            const pathParts = window.location.pathname.split('/');
-            if (pathParts[1] === 's') {
-                const shareId = pathParts[2];
-                const { data, error } = await supabaseClient
-                    .from('media')
-                    .select('*')
-                    .eq('share_id', shareId)
-                    .eq('privacy_level', 'link')
-                    .single();
-
-                if (error || !data) {
-                    location.href = '/';
-                    return;
-                }
-
-                document.querySelector('.container').innerHTML = `
-                    <header>
-                        <a href="/" class="header-logo">img.kdev.world</a>
-                    </header>
-                    <div class="media-card">
-                        <div class="media-content">
-                            ${data.file_type === 'video' 
-                                ? `<video src="${data.url}" controls></video>`
-                                : `<img src="${data.url}" alt="${data.title}">`}
-                        </div>
-                        <div class="media-info">
-                            <h3 class="media-title">${data.title}</h3>
-                            <div>${new Date(data.created_at).toLocaleDateString()}</div>
-                        </div>
-                    </div>
-                `;
-            }
+        async function addCommentAndRefresh(event, mediaId) {
+            event.preventDefault();
+            await addComment(event, mediaId);
+            closeCommentsModal();
+            loadMedia();
         }
 
-        supabaseClient.auth.onAuthStateChange((event, session) => {
-            currentUser = session?.user || null;
-            const authButton = document.getElementById('authButton');
-            const uploadSection = document.getElementById('uploadSection');
-
-            if (currentUser) {
-                authButton.textContent = 'Выйти';
-                authButton.onclick = () => supabaseClient.auth.signOut();
-                uploadSection.style.display = 'block';
-            } else {
-                authButton.textContent = 'Войти';
-                authButton.onclick = toggleModal;
-                uploadSection.style.display = 'none';
-            }
-
-            loadMedia();
-        });
-
-        document.getElementById('loginForm').addEventListener('submit', handleAuth);
-        document.getElementById('uploadForm').addEventListener('submit', handleUpload);
-        document.getElementById('modalOverlay').addEventListener('click', (e) => {
-            if (e.target === e.currentTarget) toggleModal();
-        });
+        function toggleTheme() {
+            const theme = document.body.getAttribute('data-theme') === 'dark' ? '' : 'dark';
+            document.body.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+        }
 
         document.addEventListener('DOMContentLoaded', () => {
             const savedTheme = localStorage.getItem('theme') || '';
